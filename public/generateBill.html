@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <style>
+      body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        padding-top: 20px;
+      }
+
+    </style>
+</head>
+<body>
+  <div class="search_student" style="display: flex;justify-content: center;align-items: center;flex-direction: column;">
+    <label for="rid" class="text-center">Enter Registration Number</label>
+    <input type="text" class="form-control" id="rid" name="rid">
+    <br>
+    <button class="btn btn-primary form-control" id="search" onclick="genarateBill(event)">Search</button>
+  </div>
+  <br>
+    <div class="container" id="container">
+        <div class="card">
+      <div class="card-header">
+      Invoice
+      <strong id="date"></strong> 
+        <span class="float-right"> <strong>Status:</strong> Pending</span>
+      
+      </div>
+      <div class="card-body">
+      <div class="row mb-4">
+      <div class="col-sm-6">
+      <h6 class="mb-3">From:</h6>
+      <div>
+      <strong>Rabindra Path Bhaban</strong>
+      </div>
+      <div>Madalinskiego 8</div>
+      <div>71-101 Szczecin, Poland</div>
+      <div>Email: info@webz.com.pl</div>
+      <div>Phone: +48 444 666 3333</div>
+      </div>
+      
+      <div class="col-sm-6">
+      <h6 class="mb-3">To:</h6>
+      <div>
+      <strong id="name"></strong>
+      </div>
+      <div id="rid"></div>
+      <div id="class"></div>
+      <div id="section"></div>
+      <div id="roll"></div>
+      <div id="phn_no"></div>
+    </div>
+      
+      
+      
+      </div>
+      <div class="table-responsive-sm">
+      <table id="bill-table" class="table table-striped">
+      <thead>
+      <tr>
+      <th class="center">#</th>
+      <th>Name</th>
+      <th>Publisher</th>
+      
+      <th class="right">Unit Cost</th>
+      <th class="center">Tax</th>
+      <th class="right">Total</th>
+      <th class="right" id="action">Action</th>
+      </tr>
+      </thead>
+      <tbody id="records">
+      
+      
+      </tbody>
+      </table>
+      </div>
+      <div class="row">
+      <div class="col-lg-4 col-sm-5">
+      
+      </div>
+      <div class="col-lg-4 col-sm-5" >
+        <label for="note">Notes</label>
+        <textarea id="note" name="w3review" rows="3" cols="30"> </textarea>
+      </div>
+      <p id="notes"></p>
+      <div class="col-lg-4 col-sm-5 ml-auto">
+      <table class="table table-clear">
+      <tbody>
+      <tr>
+        <td class="left">
+          <strong>Total</strong>
+        </td>
+        <td class="right">
+          <strong id="total"></strong>
+        </td>
+      </tr>
+      <tr>
+      <td class="left">
+      <strong>Payment Mode</strong>
+      <br>
+      <input type="checkbox" name="payement" id=""> Online Payement
+      </td>
+      </tr>
+      <tr id="cash">
+        <td class="left" id="cform">
+        Paid Amount <input type="text" id="paid">
+        <br>
+        <br>
+        Due <input type="text" id="due" readonly>
+        </td>
+      </tr>
+      <tr id="online">
+        <td class="left" id="tform" colspan="2">
+        Transaction Id <input type="text" id="tid">
+        Transaction Date <input type="date" id="tdate">
+        Transaction Bank Id <input type="text" id="tbid">
+        </td>
+      </tr>
+      <tr>
+        <td>Notes: <span id="notes"></span></td>
+      </tr>
+
+      </tbody>
+      </table>
+      <button onclick="printDiv()">Print</button>
+      
+      </div>
+
+      
+      </div>
+      
+      </div>
+      </div>
+    </div>
+
+
+    <script type="text/javascript">
+        // globals
+        var booklist = [];
+
+
+        var result, books;
+        var Total1=0
+
+        const paidAmt = document.getElementById('paid');
+        const dueAmt = document.getElementById('due');
+        const totalAmt = document.getElementById('total');
+        const transaction_id=document.getElementById('tid')
+        const transaction_date=document.getElementById('tdate')
+        const transaction_bank=document.getElementById('tbid')
+        var notes=document.getElementById('note')
+
+        const tbody=document.getElementById('records')
+
+
+        document.getElementById("container").style.display="none"
+
+
+        // Event Handler
+        function removeBook(event) {
+          let books = [], i = 0;
+          booklist.forEach(book => {
+            if (!(book.book_id === parseInt(event.target.getAttribute('data-bookID'))))
+              books[i++] = book;
+          });
+          booklist = books;
+          addBooks();
+        }
+
+
+        function addBooks() {
+            let books = booklist
+            // console.log(books);
+            var count=1;
+            var due=""
+            let Total=0;
+            tbody.innerHTML = '';
+            books.forEach(book => {
+            const tr=document.createElement('tr');
+            if(book['stock']===0)
+              due="Due"
+              tr.innerHTML=`<td class="center">${count}</td>
+              <td>${book['book_name']}</td>
+              <td>${book['book_publisher']}(Class:${book['class']}) ${due}</td>
+              <td class="right">${book['price']}.00</td>
+                <td class="center">0.0</td>
+              <td class="right">${book['price']}.00</td>
+              <td class="left" id="action"><button onclick="return removeBook(event)" class="btn btn-outline-danger btn-sm" data-bookID="${book.book_id}">Cancel</button></td>`
+                tbody.append(tr)
+                Total=Total+book['price']
+                count++;
+             });
+              Total1=Total;
+              document.getElementById("total").innerHTML=Total1+'.00'
+        }
+
+
+        async function genarateBill(event){
+          document.getElementById("search").disabled = true;
+          bill_no=Date.now()
+          document.getElementById("date").innerText=bill_no
+
+            document.getElementById("container").style.display="block"
+            const rid=document.getElementById("rid").value;
+            result = await fetch(`http://localhost:5000/getStudentDetails?rid='${rid}'`);
+            result = await result.json();
+            //console.log(result)
+            var Sclass=result[0]['class']
+            books=await fetch(`http://localhost:5000/getBookByClass?cl='${Sclass}'`)
+            books=await books.json();
+            //console.log(books)
+            document.getElementById("name").innerText=result[0]['name'].toUpperCase();
+            document.getElementById("rid").innerText=result[0]['rid']
+            document.getElementById("class").innerText=result[0]['class']
+            document.getElementById("section").innerText=result[0]['section']
+            document.getElementById("roll").innerText=result[0]['roll']
+            document.getElementById("phn_no").innerText=result[0]['phone_number']
+            
+            booklist = books;
+            addBooks();
+            
+        }
+       document.querySelectorAll("option").forEach(opt=>{
+         opt.addEventListener("onselect",()=>{
+           console.log(opt.value)
+         })
+       })
+       var online=document.querySelector("#online")
+       var cash=document.querySelector("#cash")
+       online.style.display = "none"
+       cash.style.display = "block"
+       var checkbox = document.querySelector("input[name=payement]");
+var online1=false;
+checkbox.addEventListener('change', function() {
+  if (this.checked) {
+    cash.style.display = "none"
+    online.style.display = "block"
+    online1=true;
+  } else {
+    online.style.display = "none"
+    cash.style.display = "block"
+    online1=false;
+  }
+});
+document.getElementById("paid").addEventListener("change",()=>{
+              console.log(Total1)
+
+              document.getElementById("due").value=Total1-document.getElementById("paid").value
+            })
+      async function printDiv() {
+            var printContents = document.getElementById("container").innerHTML;
+            var originalContents = document.body.innerHTML;
+            
+
+
+            document.body.innerHTML = printContents;
+            document.getElementById('tform').style.display="none"
+            document.getElementById('cform').style.display="none"
+            if(online1)
+            {
+              document.getElementById('online').innerHTML=`<td>Transaction Id : ${transaction_id.value} <br> Transaction Date : ${transaction_date.value} <br> Transaction Bank Code : ${transaction_bank.value}`;
+            }
+            else{
+            document.getElementById('cash').innerHTML=`<td>Paid Amount : ${paidAmt.value} <br> Due Amount : ${dueAmt.value}`;
+            }
+            document.querySelectorAll("#action").forEach(ele=>{
+              ele.style.display="none"
+            })
+            console.log(notes.value)
+            document.getElementById('notes').innerHTML=notes.value
+            ;
+            document.getElementById('note').style.display="none"
+            document.getElementById
+            console.log(books)
+            window.print();
+            if (online1){
+              record_json = {
+              student_result: result,
+              book_result: booklist,
+              payement_mode:"Online",
+              bill: {
+                Total_Amt: totalAmt.innerHTML,
+                transaction_id:transaction_id.value,
+                transaction_date: transaction_date.value,
+                transaction_bank: transaction_bank.value,
+                note:notes.value,
+              }
+            }
+            
+            }
+            else{
+              record_json = {
+              student_result: result,
+              book_result: booklist,
+              payement_mode:"Cash",
+              bill: {
+                Total_Amt: totalAmt.innerHTML,
+                Paid: paidAmt.value,
+                Due: dueAmt.value,
+                note:notes.value,
+              }
+            }
+            }
+            var student_class=result[0]['class']
+
+            var reductbook=await fetch(`http://localhost:5000/reductBooks?class='${student_class}'`)
+
+
+            console.log(record_json);
+
+            let res = await fetch('http://localhost:5000/createInvoice', {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id:bill_no,
+                json_data: record_json
+              })
+            });
+            console.log(res);
+
+            window.location.replace('http://localhost:5000/generateBill.html');
+      }
+    </script>
+</body>
+</html>

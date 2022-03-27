@@ -1,0 +1,136 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+<style>
+    body {
+  background: #f7f7f7;
+}
+
+.form-box {
+  max-width: 500px;
+  margin: auto;
+  padding: 50px;
+  background: #ffffff;
+  border: 10px solid #f2f2f2;
+}
+
+h1, p {
+  text-align: center;
+}
+
+input, textarea {
+  width: 100%;
+}
+</style>
+</head>
+  <body>
+  <div class="form-box">
+      <h1>Edit Book</h1>
+      
+      <form id="book_form" method="post">
+        <div class="form-group">
+          <label for="book_name">Book Name</label>
+          <input class="form-control" id="book_name" type="text" name="book_name">
+        </div>
+        <div class="form-group">
+          <label for="book_publisher">Book Publisher</label>
+          <input class="form-control" id="book_publisher" type="text" name="book_publisher">
+        </div>
+        <div class="form-group">
+          <label for="book_class">Class</label>
+          <select  id="book_class" name="book_class" class="form-control item" style="padding: 5px;">
+              <option value="No Options Selected">Choose Class</option>
+              <option id="L/N" value="L/N">Lower Nursary</option>
+              <option id="Nur" value="Nur">Nursary</option>
+              <option id="KG" value="KG">KG</option>
+              <option id="One" value="One">One</option>
+              <option id="Two" value="Two">Two</option>
+              <option id="Three" value="Three">Three</option>
+              <option id="Four" value="Four">Four</option>
+              <option id="Five" value="Five">Five</option>
+              <option id="Six" value="Six">Six</option>
+              <option id="Seven" value="Seven">Seven</option>
+              <option id="Eight" value="Eight">Eight</option>
+              <option id="Nine" value="Nine">Nine</option>
+              <option id="Ten" value="Ten">Ten</option>
+              <option id="XI" value="XI">XI</option>
+              <option id="XII" value="XII">XII</option>
+              </select>
+        </div>
+        <div class="form-group">
+          <label for="book_price">Book Price</label>
+          <input class="form-control" id="book_price" type="text" name="book_price">
+        </div>
+        <div class="form-group">
+          <label for="book_stock">Book Stock</label>
+          <input class="form-control" id="book_stock" type="text" name="book_stock">
+        </div>
+        <input class="btn btn-primary" type="submit" value="Add/Update" />
+        </div>
+      </form>
+    </div>
+
+    <script type="text/javascript">
+      const params = new URLSearchParams(window.location.search);
+      const book_form = document.getElementById('book_form');
+
+
+      async function fetchBookDetails() {
+        let result = await fetch(`http://localhost:5000/get-specific-book?id=${params.get('id')}`);
+        // console.log(result);
+        return result.json();
+      }
+
+      function updateForm(data) {
+        document.getElementById('book_name').value = data[0].book_name;
+        document.getElementById('book_publisher').value = data[0].book_publisher;
+        document.getElementById('book_price').value = data[0].price;
+        document.getElementById('book_stock').value = data[0].stock;
+        document.getElementById(`${data[0].class}`).setAttribute('selected', true);
+      }
+
+      window.onload = (event) => {
+        if (params.has('id')) 
+          fetchBookDetails()
+          .then(data => { console.log(data); updateForm(data); })
+          .catch(err => { console.log(err) })
+        
+      }
+
+      book_form.onsubmit = async (event) => {
+        event.preventDefault();
+        if (params.has('id'))
+          await fetch(`http://localhost:5000/update-book`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              "book_id": params.get('id'),
+              "book_name": document.getElementById('book_name').value,
+              "book_publisher": document.getElementById('book_publisher').value,
+              "class": document.getElementById('book_class').value,
+              "price": document.getElementById('book_price').value,
+              "stock": document.getElementById('book_stock').value
+            })
+          })
+        else
+          await fetch(`http://localhost:5000/update-book`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              "book_name": document.getElementById('book_name').value,
+              "book_publisher": document.getElementById('book_publisher').value,
+              "class": document.getElementById('book_class').value,
+              "price": document.getElementById('book_price').value,
+              "stock": document.getElementById('book_stock').value
+            })
+          });
+        window.location.replace('http://localhost:5000/books');
+      }
+    </script>
+  </body>
+</html>

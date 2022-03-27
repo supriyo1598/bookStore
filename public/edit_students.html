@@ -1,0 +1,162 @@
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+    <style>
+        body {
+      background: #f7f7f7;
+    }
+    
+    .form-box {
+      max-width: 500px;
+      margin: auto;
+      padding: 50px;
+      background: #ffffff;
+      border: 10px solid #f2f2f2;
+    }
+    
+    h1, p {
+      text-align: center;
+    }
+    
+    input, textarea {
+      width: 100%;
+    }
+    </style>
+    </head>
+      <body>
+      <div class="form-box">
+          <h1>Edit Student</h1>
+          
+          <form id="student_form" method="POST">
+            <div class="form-group">
+                <input type="text" class="form-control item" name="rid" id="rid"  placeholder="Registration Number">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control item" name="name" id="name" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <select  id="class" name="class" class="form-control item" style="padding: 5px;">
+                  <option value="No Options Selected">Choose Class</option>
+                  <option id="L/N" value="L/N">Lower Nursary</option>
+                  <option id="Nur" value="Nur">Nursary</option>
+                  <option id="KG" value="KG">KG</option>
+                  <option id="One" value="One">One</option>
+                  <option id="Two" value="Two">Two</option>
+                  <option id="Three" value="Three">Three</option>
+                  <option id="Four" value="Four">Four</option>
+                  <option id="Five" value="Five">Five</option>
+                  <option id="Six" value="Six">Six</option>
+                  <option id="Seven" value="Seven">Seven</option>
+                  <option id="Eight" value="Eight">Eight</option>
+                  <option id="Nine" value="Nine">Nine</option>
+                  <option id="Ten" value="Ten">Ten</option>
+                  <option id="XI" value="XI">XI</option>
+                  <option id="XII" value="XII">XII</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <select  id="section" name="section" class="form-control item" style="padding: 5px;">
+                    <option value="No Payment Options Selected">Choose Section</option>
+                    <option id="sectionA" value="A">A</option>
+                    <option id="sectionB" value="B">B</option>
+                    <option id="sectionC" value="C">C</option>  
+                </select>
+            </div>
+            <div class="form-group">
+                <select name="secondlang"  id="secondlang" class="form-control item" style="padding: 5px;">
+                    <option value="">2nd Language</option>
+                    <option id="secondA" value="A">Bengali</option>
+                    <option id="secondB" value="B">Hindi</option> 
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="text" name="roll" class="form-control item" id="roll" placeholder="Roll Number">
+            </div>
+            <div class="form-group">
+                <label for="birth-date">Birth Date</label>
+                <input type="date" class="form-control item" id="birth-date" name="birth-date" placeholder="Birth Date">
+            </div>
+            <div class="form-group">
+                <input type="text" id="phone-number" class="form-control item" name="phone-number" placeholder="Phone Number">
+            </div>
+            <div class="form-group">
+                <button type="submit" name="submit" class="btn btn-block create-account">Register</button>
+            </div>
+             <p>A product of ⒸSixAxis Technology</p>
+        </form>
+    
+        </div>
+    
+        <script type="text/javascript">
+          const params = new URLSearchParams(window.location.search);
+          const student_form = document.getElementById('student_form');
+    
+    
+          async function fetchBookDetails() {
+            console.log(params.get('rid'))
+            let result = await fetch(`http://localhost:5000/get-specific-student?rid=${params.get('rid')}`);
+            // console.log(result);
+            return result.json();
+          }
+          window.onload = (event) => {
+        if (params.has('rid')) 
+          fetchBookDetails()
+          .then(data => { console.log(data); updateForm(data); })
+          .catch(err => { console.log(err) })
+        
+      }
+    
+          function updateForm(data) {
+            document.getElementById('rid').value = data[0].rid;
+            document.getElementById('name').value = data[0].name;
+            document.getElementById(`${data[0].class}`).setAttribute('selected', true);
+            document.getElementById(`section${data[0].section}`).setAttribute('selected', true);
+            document.getElementById(`second${data[0].secondlang}`).setAttribute('selected', true);
+            document.getElementById('roll').value=data[0].roll;
+            document.getElementById('birth-date').value=data[0].birth_date;
+            document.getElementById('phone-number').value=data[0].phone_number;
+          }
+
+    
+          student_form.onsubmit = async (event) => {
+            event.preventDefault();
+            if (params.has('rid'))
+              await fetch(`http://localhost:5000/update-student`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  "rid": params.get('rid'),
+                  "name": document.getElementById('name').value,
+                  "class": document.getElementById('class').value,
+                  "section": document.getElementById('section').value,
+                  "secondlang": document.getElementById('secondlang').value,
+                  "roll": document.getElementById('roll').value,
+                  "birth_date": document.getElementById('birth-date').value,
+                  "phone_number":document.getElementById('phone-number').value
+                })
+              })
+            else
+              await fetch(`http://localhost:5000/update-student`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  "rid": params.get('rid'),
+                  "name": document.getElementById('name').value,
+                  "class": document.getElementById('class').value,
+                  "section": document.getElementById('section').value,
+                  "secondlang": document.getElementById('secondlang').value,
+                  "roll": document.getElementById('roll').value,
+                  "birth_date": document.getElementById('birth-date').value,
+                  "phone_number":document.getElementById('phone-number').value
+                })
+              });
+            window.location.replace('http://localhost:5000/books');
+          }
+        </script>
+      </body>
+    </html>
